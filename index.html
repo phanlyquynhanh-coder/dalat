@@ -344,7 +344,7 @@ html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{dis
 .zmap-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px}
 .zmap-h h2{margin:0;font-size:clamp(20px,3.2vw,28px);font-weight:800;letter-spacing:-.02em;color:var(--fg)}
 .zmap-h p{margin:0;font-size:13px;color:var(--muted)}
-.zmap{display:block;width:100%;height:auto;border-radius:14px;border:1px solid var(--line)}
+.zmap{display:block;width:100%;max-width:760px;margin:0 auto;height:auto;border-radius:18px;border:1px solid #e3d5b5}
 .zmap .zb{cursor:pointer;transition:filter .2s}
 .zmap .zb:hover,.zmap .zb.on{filter:drop-shadow(0 6px 10px rgba(20,60,40,.35)) brightness(1.03)}
 .zgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px}
@@ -964,41 +964,67 @@ function renderSpots(){
 $("spFilters").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;
   if(b.dataset.w)spWhen=b.dataset.w;if(b.dataset.z)spZone=b.dataset.z;renderSpots()});
 /* bản đồ khu */
-function hull(pts){if(pts.length<3)return pts.slice();const p=pts.slice().sort((a,b)=>a[0]-b[0]||a[1]-b[1]);const cr=(o,a,b)=>(a[0]-o[0])*(b[1]-o[1])-(a[1]-o[1])*(b[0]-o[0]);const lo=[],up=[];for(const q of p){while(lo.length>=2&&cr(lo[lo.length-2],lo[lo.length-1],q)<=0)lo.pop();lo.push(q)}for(let i=p.length-1;i>=0;i--){const q=p[i];while(up.length>=2&&cr(up[up.length-2],up[up.length-1],q)<=0)up.pop();up.push(q)}up.pop();lo.pop();return lo.concat(up)}
-const ZM={W:1000,H:640,cx:420,cy:215};const zR=d=>d<=8?40*d:320+11*(d-8);
-function zPt(xy){const x=+xy[0],y=+xy[1],d=Math.hypot(x,y);if(!d)return[ZM.cx,ZM.cy];const r=zR(d);return[ZM.cx+r*x/d,ZM.cy-r*y/d]}
+/* bản đồ khu – kiểu poster minh hoạ */
+const ZICON=[[/lẩu/,"🍲"],[/cà phê|cafe|coffee|caphe|cf /,"☕"],[/bánh căn|bánh xèo|bánh khọt/,"🥞"],[/pizza/,"🍕"],[/nướng|bbq|xiên/,"🍢"],[/bánh mì|xíu mại/,"🥖"],[/phở|bún|mì |mì$|hủ tiếu|bánh canh|miến/,"🍜"],[/kem|chè|sữa đậu|trà sữa|sữa chua/,"🍧"],[/trà|tea/,"🍵"],[/chợ/,"🏮"],[/đặc sản|quà|mứt|dalato|tiệm/,"🎁"],[/thác/,"💦"],[/đồi|đỉnh|núi|langbiang|vọng/,"⛰️"],[/vườn|hoa|hồng/,"🌷"],[/hồ /,"🛶"],[/chùa|thiền|nhà thờ|ga /,"⛩️"],[/làng|thôn|cổ trấn|nông trại/,"🏡"]];
+const TICON={sang:"🍳",trua:"🍱",toi:"🍲",cfs:"☕",cft:"🌙",choi:"📸",qua:"🎁"};
+function zIcon(p){const n=" "+String(p.name||"").toLowerCase()+" ";for(const[r,i]of ZICON)if(r.test(n))return i;return TICON[tagsOf(p)[0]]||"📍"}
+function zWrap(s,max,lines){const w=String(s).split(/\s+/);const out=[];let cur="";for(const x of w){if(!cur)cur=x;else if((cur+" "+x).length<=max)cur+=" "+x;else{out.push(cur);cur=x}}if(cur)out.push(cur);if(out.length>lines){out.length=lines;out[lines-1]=out[lines-1].slice(0,max-1)+"…"}return out.map(l=>l.length>max+2?l.slice(0,max)+"…":l)}
+function zTree(x,y,s){s=s||1;const c=["#2f6b45","#3d7d52","#285c3b"][Math.abs(Math.round(x+y))%3];return "<g transform='translate("+x+","+y+") scale("+s+")'><rect x='-2.5' y='0' width='5' height='9' fill='#7a5534'/><path d='M0 -34 L13 -14 L7 -14 L17 0 L-17 0 L-7 -14 L-13 -14Z' fill='"+c+"'/></g>"}
+function zFlower(x,y,c){let g="<g transform='translate("+x+","+y+")'>";[[0,0],[7,-4],[-7,-4],[4,6],[-5,6],[0,-9]].forEach(q=>g+="<circle cx='"+q[0]+"' cy='"+q[1]+"' r='5.2' fill='"+c+"' opacity='.85'/>");return g+"<circle r='2' fill='#fff'/></g>"}
 let zPick=null;
+const ZL={W:720,PW:344,PH:450};
 function zoneSvg(){
-  const{W,H,cx,cy}=ZM;const on=p=>zTag==="all"||tagsOf(p).includes(zTag);
-  const pts=spots.filter(p=>Array.isArray(p.xy)&&ZBY[p.zone]).map(p=>({p,xy:zPt(p.xy)}));
-  let g="";for(let x=0;x<=W;x+=50)g+="<line x1='"+x+"' y1='0' x2='"+x+"' y2='"+H+"'/>";for(let y=0;y<=H;y+=50)g+="<line x1='0' y1='"+y+"' x2='"+W+"' y2='"+y+"'/>";
-  const RK=[1,3,5,8,12,16];const rings=RK.map(km=>"<circle cx='"+cx+"' cy='"+cy+"' r='"+zR(km).toFixed(1)+"' fill='none' stroke='#b9c8d6' stroke-width='1.2' stroke-dasharray='4 5'/>").join("");
-  const free=(x,y,rad)=>!pts.some(o=>Math.hypot(o.xy[0]-x,o.xy[1]-y)<rad);
-  const ringLbl=RK.map(km=>{const r=zR(km);let best=null;for(const deg of [55,40,70,25,85,10,100,-10,120,140,160,-30,180,-150]){const a=deg*Math.PI/180,x=cx+r*Math.cos(a),y=cy-r*Math.sin(a);if(x<30||x>W-30||y<16||y>H-34)continue;if(free(x,y,30)){best=[x,y];break}}if(!best)return"";const[x,y]=best;return "<g transform='translate("+x.toFixed(1)+","+y.toFixed(1)+")' style='pointer-events:none'><rect x='-22' y='-9' width='44' height='18' rx='9' fill='#fff' stroke='#d3dee8'/><text y='4' text-anchor='middle' font-size='10.5' font-weight='700' fill='#6c8193'>"+km+" km</text></g>"}).join("");
-  const hulls=ZONES.map(z=>{const zp=pts.filter(o=>String(o.p.zone)===String(z.n)).map(o=>o.xy);if(!zp.length)return"";const d=zp.map(q=>"M"+q[0].toFixed(1)+" "+q[1].toFixed(1)+"h0.01").join("");const sel=zSel===z.n,dim=zSel&&!sel;
-    return "<g class='zh' data-zone='"+z.n+"' style='cursor:pointer;opacity:"+(dim?.35:1)+"'><path d='"+d+"' fill='none' stroke='"+z.c+"' stroke-width='"+(sel?50:46)+"' stroke-linecap='round' opacity='"+(sel?.7:.5)+"'/><path d='"+d+"' fill='none' stroke='#fff' stroke-width='"+(sel?46:42)+"' stroke-linecap='round'/><path d='"+d+"' fill='none' stroke='"+z.c+"' stroke-width='"+(sel?46:42)+"' stroke-linecap='round' opacity='"+(sel?.24:.15)+"'/></g>"}).join("");
-  const boxes=[[cx-80,cy-20,160,64]];const lead=[];const labels=ZONES.map(z=>{const zp=pts.filter(o=>String(o.p.zone)===String(z.n)).map(o=>o.xy);if(!zp.length)return"";
-    const mx=zp.reduce((s,q)=>s+q[0],0)/zp.length,my=zp.reduce((s,q)=>s+q[1],0)/zp.length;
-    const n=spots.filter(p=>String(p.zone)===String(z.n)&&on(p)).length;const t="Khu "+z.n+" · "+z.name.split(" · ")[0];const w=Math.max(130,t.length*7.9+52),h=30;
-    let best=null,bs=1e9;for(let y=24;y<=H-44;y+=12)for(let x=w/2+10;x<=W-w/2-10;x+=12){const bx=x-w/2,by=y-h/2;
-      if(boxes.some(b=>bx<b[0]+b[2]+8&&bx+w+8>b[0]&&by<b[1]+b[3]+6&&by+h+6>b[1]))continue;
-      if(pts.some(o=>o.xy[0]>bx-24&&o.xy[0]<bx+w+24&&o.xy[1]>by-24&&o.xy[1]<by+h+24))continue;
-      const dist=Math.hypot(x-mx,y-my);if(dist<bs){bs=dist;best=[x,y]}}
-    if(!best)best=[mx,my];const[lx,ly]=best;boxes.push([lx-w/2,ly-h/2,w,h]);
-    const near=zp.reduce((a,q)=>Math.hypot(q[0]-lx,q[1]-ly)<Math.hypot(a[0]-lx,a[1]-ly)?q:a,zp[0]);
-    lead.push("<line x1='"+lx.toFixed(0)+"' y1='"+ly.toFixed(0)+"' x2='"+near[0].toFixed(1)+"' y2='"+near[1].toFixed(1)+"' stroke='"+z.c+"' stroke-width='1.6' stroke-dasharray='3 3'/>");
-    return "<g class='zl' data-zone='"+z.n+"' style='cursor:pointer' transform='translate("+lx.toFixed(0)+","+ly.toFixed(0)+")'><rect x='"+(-w/2)+"' y='-15' width='"+w+"' height='30' rx='15' fill='"+z.c+"'/><text x='"+(-w/2+14)+"' y='5' font-size='13' font-weight='800' fill='#fff'>"+esc(t)+"</text><rect x='"+(w/2-34)+"' y='-10' width='26' height='20' rx='10' fill='#fff' opacity='.95'/><text x='"+(w/2-21)+"' y='4.5' text-anchor='middle' font-size='11.5' font-weight='800' fill='"+z.c+"'>"+n+"</text></g>"}).join("");
-  const dots=pts.slice().sort((a,b)=>(on(a.p)?1:0)-(on(b.p)?1:0)).map(o=>{const z=ZBY[o.p.zone],act=on(o.p)&&(!zSel||zSel===z.n),pk=zPick===o.p.id;
-    return "<g class='zd' data-spot='"+o.p.id+"' style='cursor:pointer;opacity:"+(act?1:.18)+"'><circle cx='"+o.xy[0].toFixed(1)+"' cy='"+o.xy[1].toFixed(1)+"' r='"+(pk?9:6)+"' fill='"+(o.p.est?"#fff":z.c)+"' stroke='"+(o.p.est?z.c:"#fff")+"' stroke-width='"+(o.p.est?2.2:2)+"'"+(o.p.est?" stroke-dasharray='2.5 2'":"")+"/><title>"+esc(o.p.name)+" · "+esc(kmTxt(o.p))+"</title></g>"}).join("");
-  const nb=[];const names=zSel?pts.filter(o=>String(o.p.zone)===String(zSel)&&on(o.p)).sort((a,b)=>(kmOf(a.p)??99)-(kmOf(b.p)??99)).map(o=>{const t=o.p.name.split(" – ")[0].slice(0,26),w=t.length*6.1+4;
-    for(const side of [1,-1]){const x=side>0?o.xy[0]+9:o.xy[0]-9-w,y=o.xy[1]-7;if(x<4||x+w>W-4)continue;if(nb.some(b=>x<b[0]+b[2]&&x+w>b[0]&&y<b[1]+14&&y+14>b[1]))continue;nb.push([x,y,w]);
-      return "<text x='"+x.toFixed(1)+"' y='"+(y+11).toFixed(1)+"' font-size='11' font-weight='700' fill='#22384a' stroke='#fff' stroke-width='3' paint-order='stroke' style='pointer-events:none'>"+esc(t)+"</text>"}return""}).join(""):"";
-  return "<svg class='zmap' viewBox='0 0 "+W+" "+H+"' xmlns='http://www.w3.org/2000/svg' role='img' aria-label='Sơ đồ quán theo khu, tâm là khách sạn'>"+
-    "<defs><radialGradient id='zbg' cx='47%' cy='47%' r='70%'><stop offset='0' stop-color='#ffffff'/><stop offset='1' stop-color='#eef3f8'/></radialGradient></defs>"+
-    "<rect width='"+W+"' height='"+H+"' fill='url(#zbg)'/><g stroke='#e8eef4' stroke-width='1'>"+g+"</g>"+rings+hulls+ringLbl+lead.join('')+dots+names+labels+
-    "<g transform='translate("+cx+","+cy+")' style='pointer-events:none'><circle r='17' fill='#c0392b' opacity='.18'/><circle r='10' fill='#c0392b' stroke='#fff' stroke-width='3'/><rect x='-78' y='16' width='156' height='24' rx='12' fill='#1d2b38'/><text y='32' text-anchor='middle' font-size='12' font-weight='800' fill='#fff'>🏨 Phương Trinh Villa</text></g>"+
-    "<g transform='translate("+(W-40)+",40)'><circle r='22' fill='#fff' stroke='#d3dee8'/><path d='M0 -14 L7 4 L0 0 L-7 4Z' fill='#1d2b38'/><text y='16' text-anchor='middle' font-size='10' font-weight='800' fill='#1d2b38'>B</text></g>"+
-    "<text x='18' y='"+(H-16)+"' font-size='11.5' fill='#6c8193'>Vòng tròn = khoảng cách đường đi ước tính từ khách sạn · chấm viền đứt = vị trí ước tính theo địa chỉ</text></svg>";
+  const{W,PW,PH}=ZL;const on=p=>zTag==="all"||tagsOf(p).includes(zTag);
+  const ORDER=["choi","sang","cfs","trua","toi","cft","qua"];
+  const POS={1:[10,180],2:[366,204],3:[10,866],5:[366,890],4:[10,1356],6:[366,1380]};
+  const H=1880,cxH=470,cyH=718;
+  // nền
+  let bg="<rect width='"+W+"' height='"+H+"' fill='#f6eedb'/>";
+  bg+="<path d='M0 150 Q120 105 240 140 T480 132 T720 128 V190 H0Z' fill='#cfe1c0'/><path d='M0 170 Q160 130 330 162 T720 150 V200 H0Z' fill='#b9d4a8'/>";
+  // đường
+  const roads=Object.entries(POS).map(([n,[x,y]])=>{const tx=x+PW/2,ty=y+PH/2;const mx=(cxH+tx)/2+(x<100?-60:60),my=(cyH+ty)/2;return "M"+cxH+" "+cyH+" Q"+mx+" "+my+" "+tx+" "+ty}).join(" ");
+  bg+="<path d='"+roads+"' fill='none' stroke='#e6d6b2' stroke-width='22' stroke-linecap='round'/><path d='"+roads+"' fill='none' stroke='#fffaf0' stroke-width='3' stroke-dasharray='10 10'/>";
+  // tiêu đề
+  let ttl="<path d='M30 22 H690 L668 56 L690 90 H30 L52 56Z' fill='#7b2323'/><path d='M30 22 H690 L668 56 L690 90 H30 L52 56Z' fill='none' stroke='#f3d9a4' stroke-width='2' transform='translate(0,0)' stroke-dasharray='0'/>"+
+    "<text x='360' y='72' text-anchor='middle' font-size='44' font-weight='900' fill='#fff4dc' letter-spacing='3'>BẢN ĐỒ ĐÀ LẠT</text>"+
+    "<rect x='150' y='100' width='420' height='38' rx='19' fill='#fffaf0' stroke='#c9a96a' stroke-width='1.5'/><text x='360' y='125' text-anchor='middle' font-size='17' font-weight='700' fill='#5b3b1a'>6 khu quanh khách sạn · chọn khu rồi chọn quán</text>";
+  // trang trí cây
+  let deco="";[[20,170,.9],[700,160,1],[18,1872,.8],[702,1872,.8],[40,850,.8],[690,870,.8],[360,860,.9],[36,660,.9],[690,684,.9],[20,1346,.8],[700,1370,.8]].forEach(t=>deco+=zTree(t[0],t[1],t[2]));
+  [[40,1846,"#8b7fd6"],[680,1846,"#6fa5e0"],[700,200,"#d98bc0"],[24,640,"#8b7fd6"]].forEach(f=>deco+=zFlower(f[0],f[1],f[2]));
+  // hồ + khách sạn
+  let mid="<path d='M150 700 C180 660 260 662 300 690 C330 712 360 700 360 730 C362 770 300 790 250 782 C200 776 170 800 150 770 C130 745 132 722 150 700Z' fill='#9ccfe4' stroke='#6aaecb' stroke-width='3'/>"+
+    "<path d='M180 720 q15 -6 30 0 M230 750 q15 -6 30 0' stroke='#e9f6fb' stroke-width='3' fill='none' stroke-linecap='round'/>"+
+    "<text x='255' y='742' text-anchor='middle' font-size='17' font-weight='800' fill='#1f5d78'>Hồ Xuân Hương</text>"+
+    zTree(118,712,.9)+zTree(392,730,.8)+zTree(600,780,.9)+zTree(640,760,.7)+
+    "<g transform='translate("+cxH+","+cyH+")' style='pointer-events:none'><ellipse cx='0' cy='4' rx='22' ry='7' fill='#000' opacity='.15'/><path d='M0 0 C-22 -26 -24 -40 -24 -48 A24 24 0 0 1 24 -48 C24 -40 22 -26 0 0Z' fill='#c0392b' stroke='#fff' stroke-width='3'/><text y='-40' text-anchor='middle' font-size='22'>🏨</text>"+
+    "<rect x='-118' y='14' width='236' height='54' rx='14' fill='#1d2b38'/><text y='37' text-anchor='middle' font-size='17' font-weight='800' fill='#fff'>Phương Trinh Villa</text><text y='58' text-anchor='middle' font-size='13' fill='#cfe0ee'>135A Phù Đổng Thiên Vương</text></g>";
+  // các khu
+  const panels=ZONES.map(z=>{const[x,y]=POS[z.n];const sel=zSel===z.n,dim=zSel&&!sel;
+    const all=spots.filter(p=>String(p.zone)===String(z.n));const inZ=all.filter(on);
+    const grp={};inZ.forEach(p=>{const t=tagsOf(p)[0]||"choi";(grp[t]=grp[t]||[]).push(p)});Object.values(grp).forEach(a=>a.sort((a,b)=>(kmOf(a)??99)-(kmOf(b)??99)));
+    const pick=[];let more=true;while(pick.length<6&&more){more=false;for(const t of ORDER){if(pick.length>=6)break;if(grp[t]&&grp[t].length){pick.push(grp[t].shift());more=true}}}
+    const cx=[x+PW*.27,x+PW*.73],ry=[y+140,y+242,y+344];const slot=[[0,0],[1,0],[1,1],[0,1],[0,2],[1,2]].map(s=>[cx[s[0]],ry[s[1]]]);
+    let path="";for(let i=1;i<pick.length;i++){const a=slot[i-1],b=slot[i];const mx=(a[0]+b[0])/2+(a[1]===b[1]?0:(a[0]<x+PW/2?-34:34)),my=(a[1]+b[1])/2+(a[1]===b[1]?-22:0);path+="M"+a[0].toFixed(1)+" "+a[1]+" Q"+mx.toFixed(1)+" "+my+" "+b[0].toFixed(1)+" "+b[1]}
+    const pins=pick.map((p,i)=>{const[px,py]=slot[i];const k=kmTxt(p).replace("~","");const pk=zPick===p.id;const ln=zWrap(p.name.split(" – ")[0].split(" - ")[0].split(" (")[0],14,2);
+      return "<g class='zd' data-spot='"+p.id+"' style='cursor:pointer'><ellipse cx='"+px.toFixed(1)+"' cy='"+(py+27)+"' rx='22' ry='5' fill='#000' opacity='.1'/><circle cx='"+px.toFixed(1)+"' cy='"+py+"' r='"+(pk?32:28)+"' fill='#fffdf7' stroke='"+z.c+"' stroke-width='3.5'"+(p.est?" stroke-dasharray='5 4'":"")+"/><text x='"+px.toFixed(1)+"' y='"+(py+9)+"' text-anchor='middle' font-size='26'>"+zIcon(p)+"</text>"+
+        (k?"<rect x='"+(px+26).toFixed(1)+"' y='"+(py-11)+"' width='"+(k.length*7.6+14)+"' height='22' rx='11' fill='"+z.c+"' stroke='#fff' stroke-width='2'/><text x='"+(px+33).toFixed(1)+"' y='"+(py+4.5)+"' font-size='12.5' font-weight='800' fill='#fff'>"+esc(k)+"</text>":"")+
+        ln.map((l,j)=>"<text x='"+px.toFixed(1)+"' y='"+(py+50+j*19)+"' text-anchor='middle' font-size='16' font-weight='700' fill='#3a2d1f' stroke='#fbf6ea' stroke-width='4' paint-order='stroke'>"+esc(l)+"</text>").join("")+
+        "<title>"+esc(p.name)+(k?" · "+esc(k):"")+"</title></g>"}).join("");
+    let fill="";for(let i=pick.length;i<6;i++){const[px,py]=slot[i];fill+=zTree(px-18,py+20,.9)+zTree(px+14,py+26,.75)}
+    const nm=z.name.split(" · ")[0];const rest=inZ.length-pick.length;
+    return "<g data-zone='"+z.n+"' tabindex='0' role='button' aria-label='Khu "+z.n+"' style='cursor:pointer;opacity:"+(dim?.38:1)+"'>"+
+      "<rect x='"+x+"' y='"+y+"' width='"+PW+"' height='"+PH+"' rx='34' fill='"+z.c+"' fill-opacity='.13' stroke='"+z.c+"' stroke-width='"+(sel?4:2.5)+"' stroke-opacity='"+(sel?1:.55)+"'/>"+
+      "<rect x='"+(x+6)+"' y='"+(y+6)+"' width='"+(PW-12)+"' height='"+(PH-12)+"' rx='29' fill='#fffaf0' fill-opacity='.55'/>"+
+      "<rect x='"+(x+14)+"' y='"+(y+16)+"' width='"+(PW-28)+"' height='46' rx='23' fill='"+z.c+"'/>"+
+      "<text x='"+(x+30)+"' y='"+(y+46)+"' font-size='"+(nm.length>10?16.5:19)+"' font-weight='800' fill='#fff'>📍 Khu "+z.n+" · "+esc(nm)+"</text>"+
+      "<rect x='"+(x+PW-64)+"' y='"+(y+25)+"' width='40' height='28' rx='14' fill='#fff'/><text x='"+(x+PW-44)+"' y='"+(y+45)+"' text-anchor='middle' font-size='15' font-weight='900' fill='"+z.c+"'>"+inZ.length+"</text>"+
+      "<text x='"+(x+PW/2)+"' y='"+(y+88)+"' text-anchor='middle' font-size='14.5' font-style='italic' font-weight='600' fill='#5b4a36'>"+esc(z.sub)+"</text>"+
+      fill+(path?"<path d='"+path+"' fill='none' stroke='"+z.c+"' stroke-width='3' stroke-dasharray='1 8' stroke-linecap='round' opacity='.8'/>":"")+
+      (pick.length?"":"<text x='"+(x+PW/2)+"' y='"+(y+230)+"' text-anchor='middle' font-size='16' fill='#7a6a55'>Không có quán hợp bộ lọc</text>")+pins+
+      (rest>0?"<text x='"+(x+PW/2)+"' y='"+(y+PH-14)+"' text-anchor='middle' font-size='14' font-weight='800' fill='"+z.c+"'>+ "+rest+" chỗ khác · bấm khu để xem hết ↓</text>":"")+
+      "</g>"}).join("");
+  const foot="<text x='360' y='"+(H-18)+"' text-anchor='middle' font-size='13' fill='#7a6a55'>Số trên huy hiệu = km đường đi ước tính từ khách sạn · viền nét đứt = vị trí ước tính theo địa chỉ</text>";
+  return "<svg class='zmap' viewBox='0 0 "+W+" "+H+"' xmlns='http://www.w3.org/2000/svg' role='img' aria-label='Bản đồ Đà Lạt chia 6 khu quanh khách sạn' font-family='inherit'>"+bg+ttl+deco+mid+panels+foot+"</svg>";
 }
 function zInfo(){const p=spots.find(x=>x.id===zPick);if(!p)return"";const z=ZBY[p.zone];
   return "<div class='zinfo' style='--zc:"+(z?z.c:"#7a8a99")+"'><div><b>"+esc(p.name)+"</b><div class='ttags' style='margin:6px 0'>"+tagsOf(p).map(tagChip).join("")+"</div><small>"+(z?"Khu "+z.n+" · ":"")+esc(kmTxt(p))+" từ KS · 📍 "+esc(p.address||"")+(p.hours?" · 🕒 "+esc(p.hours):"")+"</small></div><a class='sp-link' href='"+esc(mapUrl(p))+"' target='_blank' rel='noopener'>Google Maps ↗</a></div>"}
