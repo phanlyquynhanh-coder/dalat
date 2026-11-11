@@ -1185,7 +1185,7 @@ function renderGame(){
   }).join(""):"<div class='empty'><b>Chưa có địa điểm</b>Admin thêm địa điểm ở tab Ăn · Uống · Chơi.</div>";
   // wheel
   const top=$("gTopOnly").checked, voted=list.filter(x=>x.v.length);
-  const src=(top&&voted.length>=2?voted.slice(0,8):list.slice(0,12)).map(x=>x.p);
+  const src=(top&&voted.length>=2?voted:list).map(x=>x.p);
   $("gTopNote").textContent=top&&voted.length<2?"(chưa đủ 2 quán có phiếu, đang quay tất cả)":"";
   if(!spinning){wheelItems=src;drawWheel(wheelRot)}
   // last
