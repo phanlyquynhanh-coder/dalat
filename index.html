@@ -330,6 +330,38 @@ label.f .hint{font-weight:400;font-size:11.5px;letter-spacing:0;text-transform:n
 .adm-chip{font-size:12px;font-weight:700}
 
 html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{display:none!important}
+
+/* ===== tags + zones ===== */
+.chips-row{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.chips-row .lbl{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);margin-right:2px}
+.filters2{display:flex;flex-direction:column;gap:8px;min-width:0;flex:1}
+.ttag{display:inline-flex;align-items:center;font-size:11.5px;font-weight:800;border-radius:999px;padding:3px 9px;white-space:nowrap}
+.ttags{display:flex;flex-wrap:wrap;gap:5px}
+.zline{display:inline-flex;align-items:center;gap:6px;font-size:12.5px;font-weight:800;color:#fff;border-radius:999px;padding:4px 10px;align-self:flex-start}
+.tagpick{display:flex;flex-wrap:wrap;gap:6px}
+.tagpick label{display:inline-flex;align-items:center;gap:5px;font-size:13px;font-weight:700;background:#f4f8fb;border:1px solid var(--line);border-radius:999px;padding:5px 10px;cursor:pointer}
+.zmap-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:16px;box-shadow:0 1px 2px rgba(20,70,120,.05),0 10px 20px rgba(20,70,120,.06),0 34px 64px -20px rgba(20,90,160,.28)}
+.zmap-h{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:10px}
+.zmap-h h2{margin:0;font-size:clamp(20px,3.4vw,30px);font-weight:800;letter-spacing:-.02em;color:#1f5a35}
+.zmap-h p{margin:0;font-size:13px;color:var(--muted)}
+.zmap{display:block;width:100%;height:auto;border-radius:14px}
+.zmap .zb{cursor:pointer;transition:filter .2s}
+.zmap .zb:hover,.zmap .zb.on{filter:drop-shadow(0 6px 10px rgba(20,60,40,.35)) brightness(1.03)}
+.zgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:14px;margin-top:14px}
+.zc{background:var(--surface);border:1px solid var(--line);border-top:6px solid var(--zc);border-radius:var(--r);padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0;box-shadow:0 10px 24px rgba(20,70,120,.08)}
+.zc.on{outline:3px solid var(--zc);outline-offset:2px}
+.zc-h{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.zc-h b{font-size:16px;font-weight:800}
+.zc-h small{display:block;font-size:12px;color:var(--muted);font-weight:600}
+.zc-n{flex:none;font-size:12px;font-weight:800;color:#fff;background:var(--zc);border-radius:999px;padding:3px 10px}
+.zc-g{display:flex;flex-direction:column;gap:4px}
+.zc-g h4{margin:0;font-size:12.5px;font-weight:800}
+.zc-g ul{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:2px}
+.zc-g li{display:flex;justify-content:space-between;gap:8px;font-size:13px;border-bottom:1px dashed #e6eef4;padding:3px 0}
+.zc-g li a{color:var(--fg);text-decoration:none;font-weight:600;overflow-wrap:anywhere}
+.zc-g li a:hover{color:var(--sky);text-decoration:underline}
+.zc-g li span{flex:none;color:var(--muted);font-size:12px;font-variant-numeric:tabular-nums}
+.zc .btn{align-self:flex-start}
 </style>
 </head>
 <body>
@@ -427,6 +459,7 @@ html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{dis
 
   <nav class="tabs" role="tablist">
     <button role="tab" type="button" data-tab="game" aria-selected="true">🎲 Chọn quán</button>
+    <button role="tab" type="button" data-tab="zones" aria-selected="false">🗺️ Bản đồ khu</button>
     <button role="tab" type="button" data-tab="members" aria-selected="false">Thành viên<span class="count" id="cMem"></span></button>
     <button role="tab" type="button" data-tab="plan" aria-selected="false">Lịch trình<span class="count" id="cPlan"></span></button>
     <button role="tab" type="button" data-tab="spots" aria-selected="false">Ăn · Uống · Chơi<span class="count" id="cSpots"></span></button>
@@ -440,9 +473,7 @@ html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{dis
     <div class="g-top">
       <div class="g-who"><label for="gWho">Bạn là ai?</label><select id="gWho"></select></div>
       <div class="g-cats" id="gCats">
-        <button type="button" data-c="an" aria-pressed="true">🍲 Quán ăn</button>
-        <button type="button" data-c="cafe" aria-pressed="false">☕ Cà phê</button>
-        <button type="button" data-c="choi" aria-pressed="false">📸 Vui chơi</button>
+
       </div>
     </div>
     <div class="g-main">
@@ -460,6 +491,15 @@ html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{dis
         <p class="note" style="margin:0">Bấm 🤍 để chọn nơi bạn muốn đi, chọn bao nhiêu nơi cũng được. Bấm lại để bỏ chọn.</p>
       </div>
     </div>
+  </section>
+
+  <section class="panel" id="tab-zones" hidden>
+    <div class="zmap-wrap">
+      <div class="zmap-h"><h2>Bản đồ Đà Lạt · chia khu</h2><p>Tâm là khách sạn Phương Trinh Villa (135A Phù Đổng Thiên Vương). Khoảng cách là đường đi ước tính. Bấm vào một khu để xem quán.</p></div>
+      <div id="zMap"></div>
+      <div class="chips-row" id="zTags" style="margin-top:10px"></div>
+    </div>
+    <div class="zgrid" id="zGrid"></div>
   </section>
 
   <section class="panel" id="tab-members" hidden>
@@ -510,12 +550,7 @@ html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{dis
   <!-- SPOTS -->
   <section class="panel" id="tab-spots" hidden>
     <div class="bar-row">
-      <div class="filters" id="spFilters">
-        <button class="chip" type="button" data-f="all" aria-pressed="true">Tất cả</button>
-        <button class="chip" type="button" data-f="an" aria-pressed="false">🍲 Quán ăn</button>
-        <button class="chip" type="button" data-f="cafe" aria-pressed="false">☕ Cà phê</button>
-        <button class="chip" type="button" data-f="choi" aria-pressed="false">📸 Vui chơi</button>
-      </div>
+      <div class="filters2" id="spFilters"></div>
       <button class="btn primary" type="button" id="btnAddSp">+ Thêm địa điểm</button>
     </div>
     <section class="sheet" id="spForm" hidden>
@@ -523,6 +558,9 @@ html{-webkit-text-size-adjust:100%}body{margin:0}img{max-width:100%}[hidden]{dis
       <div class="grid">
         <label class="f">Tên *<input id="spName" type="text" autocomplete="off"></label>
         <label class="f">Loại<select id="spType"><option value="an">Quán ăn</option><option value="cafe">Cà phê</option><option value="choi">Vui chơi</option></select></label>
+        <label class="f">Khu<select id="spZone"><option value="">Chưa xếp khu</option><option value="1">Khu 1 · Quanh KS</option><option value="2">Khu 2 · Trung tâm</option><option value="3">Khu 3 · Tây – Cam Ly</option><option value="4">Khu 4 · Nam</option><option value="5">Khu 5 · Đông – Trại Mát</option><option value="6">Khu 6 · Xa</option></select></label>
+        <label class="f">Cách KS (km)<input id="spKm" type="text" inputmode="decimal" autocomplete="off" placeholder="vd: 3,5"></label>
+        <div class="f" style="grid-column:1/-1">Đi khi nào<div class="tagpick" id="spTags"></div></div>
         <label class="f">Địa chỉ *<input id="spAddr" type="text" autocomplete="off"></label>
         <label class="f">Giờ mở cửa<input id="spHours" type="text" autocomplete="off" placeholder="vd: 7:00 – 22:00"></label>
         <label class="f">Link Google Maps<input id="spUrl" type="url" autocomplete="off" placeholder="Để trống sẽ tự tìm theo tên + địa chỉ"></label>
@@ -705,7 +743,7 @@ function tick(m,k,dis){
 document.querySelector("nav.tabs").addEventListener("click",e=>{
   const b=e.target.closest("button[data-tab]"); if(!b)return;
   document.querySelectorAll("nav.tabs button").forEach(x=>x.setAttribute("aria-selected",x===b?"true":"false"));
-  ["game","members","plan","spots","expenses","summary","packing"].forEach(t=>$("tab-"+t).hidden=t!==b.dataset.tab);
+  ["game","zones","members","plan","spots","expenses","summary","packing"].forEach(t=>$("tab-"+t).hidden=t!==b.dataset.tab);
 });
 $("mFilters").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;memFilter=b.dataset.f;
   document.querySelectorAll("#mFilters .chip").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));render()});
@@ -882,24 +920,88 @@ function mapUrl(p){
   if(p.placeId)u+="&query_place_id="+encodeURIComponent(p.placeId);
   return u;
 }
+const TAGS=[["sang","🍳 Ăn sáng","#fff1bf","#7a5600"],["trua","🍱 Ăn trưa","#ffe0c2","#8f4300"],["toi","🍲 Ăn tối","#ffd6cf","#9c2e1c"],["cfs","☕ Cà phê sáng","#efe3d3","#64401f"],["cft","🌙 Quán nước tối","#e2ddfa","#45348f"],["choi","📸 Vui chơi","#dcf2e4","#1b6e41"],["qua","🎁 Đặc sản","#fde0ee","#98245b"]];
+const TAGL=Object.fromEntries(TAGS.map(t=>[t[0],t]));
+const ZONES=[{n:1,name:"Quanh khách sạn",sub:"≤ 3 km · đi bộ / xe máy vài phút",c:"#2b8bd0"},{n:2,name:"Trung tâm · Hồ Xuân Hương · Chợ đêm",sub:"3–5 km",c:"#e0603a"},{n:3,name:"Tây · Cam Ly",sub:"4–5 km",c:"#8a6fd1"},{n:4,name:"Nam · Khe Sanh, Đống Đa",sub:"4,5–6,5 km · cà phê view thành phố",c:"#d4a017"},{n:5,name:"Đông · Trại Mát, Xuân Trường",sub:"5–11 km · săn mây buổi sáng",c:"#2e7d55"},{n:6,name:"Xa · Tà Nung, Tuyền Lâm",sub:"12–17 km · cần thuê xe",c:"#7a8a99"}];
+const ZBY=Object.fromEntries(ZONES.map(z=>[z.n,z]));
+let spWhen="all", spZone="all", zSel=0, zTag="all";
+function tagsOf(p){if(Array.isArray(p.tags)&&p.tags.length)return p.tags.filter(t=>TAGL[t]);return({an:["trua","toi"],cafe:["cfs"],choi:["choi"]})[p.type]||[]}
+const kmOf=p=>{const k=parseFloat(String(p.km??"").replace(",","."));return isFinite(k)?k:null};
+const kmTxt=p=>{const k=kmOf(p);return k==null?"":"~"+String(k).replace(".",",")+" km"};
+const tagChip=t=>"<span class='ttag' style='background:"+TAGL[t][2]+";color:"+TAGL[t][3]+"'>"+TAGL[t][1]+"</span>";
+function renderSpFilters(){
+  const f=$("spFilters");if(!f)return;
+  const cnt=t=>spots.filter(p=>t==="all"||tagsOf(p).includes(t)).length;
+  f.innerHTML="<div class='chips-row'><span class='lbl'>Đi khi nào</span><button class='chip' type='button' data-w='all' aria-pressed='"+(spWhen==="all")+"'>Tất cả ("+spots.length+")</button>"+
+    TAGS.map(t=>"<button class='chip' type='button' data-w='"+t[0]+"' aria-pressed='"+(spWhen===t[0])+"'>"+t[1]+" ("+cnt(t[0])+")</button>").join("")+"</div>"+
+    "<div class='chips-row'><span class='lbl'>Khu</span><button class='chip' type='button' data-z='all' aria-pressed='"+(spZone==="all")+"'>Tất cả khu</button>"+
+    ZONES.map(z=>"<button class='chip' type='button' data-z='"+z.n+"' aria-pressed='"+(String(spZone)===String(z.n))+"'>Khu "+z.n+"</button>").join("")+"</div>";
+}
 function renderSpots(){
   const box=$("spList");if(!box)return;
   $("cSpots").textContent=spots.length?"("+spots.length+")":"";
   $("btnAddSp").hidden=!canWrite;
-  const order={an:0,cafe:1,choi:2};
-  const list=spots.filter(p=>spFilter==="all"||p.type===spFilter).sort((a,b)=>(order[a.type]??3)-(order[b.type]??3)||(b.createdAt||0)-(a.createdAt||0));
+  renderSpFilters();renderZones();
+  const list=spots.filter(p=>(spWhen==="all"||tagsOf(p).includes(spWhen))&&(spZone==="all"||String(p.zone)===String(spZone)))
+    .sort((a,b)=>(kmOf(a)??99)-(kmOf(b)??99)||String(a.name).localeCompare(String(b.name),"vi"));
   if(!spots.length){box.innerHTML="<div class='empty'><b>Chưa có địa điểm nào</b>Bấm “+ Thêm địa điểm” để lưu quán ăn, quán cà phê hay chỗ đi chơi.</div>";return}
   if(!list.length){box.innerHTML="<div class='empty'>Chưa có địa điểm trong nhóm này.</div>";return}
-  box.innerHTML=list.map(p=>"<article class='sp'><div class='sp-top'><h3>"+esc(p.name)+"</h3><span class='sp-tag "+esc(p.type)+"'>"+esc(SPT[p.type]||"Khác")+"</span></div>"+
+  box.innerHTML=list.map(p=>{const z=ZBY[p.zone];return "<article class='sp'><div class='sp-top'><h3>"+esc(p.name)+"</h3></div>"+
+    "<div class='ttags'>"+tagsOf(p).map(tagChip).join("")+"</div>"+
+    (z?"<span class='zline' style='background:"+z.c+"'>Khu "+z.n+" · "+esc(kmTxt(p)||"")+" từ KS</span>":(kmTxt(p)?"<span class='zline' style='background:#7a8a99'>"+esc(kmTxt(p))+" từ KS</span>":""))+
     (p.note?"<p class='sp-note'>"+esc(p.note)+"</p>":"")+
     "<div class='sp-meta'><span>📍 "+esc(p.address||"—")+"</span>"+(p.hours?"<span>🕒 "+esc(p.hours)+"</span>":"")+"</div>"+
     "<div class='sp-act'><a class='sp-link' href='"+esc(mapUrl(p))+"' target='_blank' rel='noopener'>Mở Google Maps ↗</a>"+
-    (canWrite?"<button class='btn ghost' type='button' data-act='editsp' data-id='"+p.id+"'>Sửa</button>":"")+"</div></article>").join("");
+    (canWrite?"<button class='btn ghost' type='button' data-act='editsp' data-id='"+p.id+"'>Sửa</button>":"")+"</div></article>"}).join("");
 }
-$("spFilters").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;spFilter=b.dataset.f;
-  document.querySelectorAll("#spFilters .chip").forEach(x=>x.setAttribute("aria-pressed",x===b?"true":"false"));renderSpots()});
+$("spFilters").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;
+  if(b.dataset.w)spWhen=b.dataset.w;if(b.dataset.z)spZone=b.dataset.z;renderSpots()});
+/* bản đồ khu */
+const ZPOS={1:[480,195,165,112],2:[455,430,150,86],3:[175,420,118,74],4:[505,640,140,70],5:[835,400,135,86],6:[150,655,120,64]};
+function zoneSvg(){
+  const cnt=n=>spots.filter(p=>String(p.zone)===String(n)&&(zTag==="all"||tagsOf(p).includes(zTag))).length;
+  let pines="";[[60,90],[110,70],[930,80],[960,150],[880,640],[950,560],[330,560],[640,520],[700,250],[300,250],[40,330],[960,300],[620,90],[360,90],[250,520],[760,640]].forEach(([x,y],i)=>{const h=26+(i%3)*8;pines+="<g transform='translate("+x+","+y+")'><path d='M0 "+(-h)+" L"+(h*.42)+" 0 L"+(-h*.42)+" 0Z' fill='#2f7a4c'/><path d='M0 "+(-h*1.35)+" L"+(h*.32)+" "+(-h*.45)+" L"+(-h*.32)+" "+(-h*.45)+"Z' fill='#3f9461'/><rect x='-2' y='0' width='4' height='7' fill='#6b4a2b'/></g>"});
+  const roads=[2,3,4,5,6].map(n=>{const [x,y]=ZPOS[n];return "<path d='M480 175 Q "+((480+x)/2+(n%2?40:-40))+" "+((175+y)/2)+" "+x+" "+y+"' fill='none' stroke='#b08a5a' stroke-width='4' stroke-dasharray='10 9' stroke-linecap='round' opacity='.75'/>"}).join("");
+  const blobs=ZONES.map(z=>{const [x,y,rx,ry]=ZPOS[z.n];const on=zSel===z.n;return "<g class='zb"+(on?" on":"")+"' data-zone='"+z.n+"' role='button' tabindex='0' aria-label='Khu "+z.n+": "+esc(z.name)+"'>"+
+    "<ellipse cx='"+x+"' cy='"+y+"' rx='"+rx+"' ry='"+ry+"' fill='"+z.c+"' fill-opacity='"+(on?.32:.18)+"' stroke='"+z.c+"' stroke-width='"+(on?4:2.5)+"' stroke-dasharray='"+(on?"0":"8 6")+"'/>"+
+    "<rect x='"+(x-rx*.82)+"' y='"+(y-ry-16)+"' rx='14' width='"+(rx*1.64)+"' height='30' fill='"+z.c+"'/>"+
+    "<text x='"+x+"' y='"+(y-ry+4)+"' text-anchor='middle' font-size='17' font-weight='800' fill='#fff'>Khu "+z.n+"</text>"+
+    "<text x='"+x+"' y='"+(y+(z.n===1?66:6))+"' text-anchor='middle' font-size='15' font-weight='800' fill='#173a28'>"+esc(z.name.split(" · ")[0])+"</text>"+
+    "<text x='"+x+"' y='"+(y+(z.n===1?86:26))+"' text-anchor='middle' font-size='13' font-weight='700' fill='#3b5b49'>"+esc(z.sub.split(" · ")[0])+" · "+cnt(z.n)+" chỗ</text></g>"}).join("");
+  return "<svg class='zmap' viewBox='0 0 1000 740' xmlns='http://www.w3.org/2000/svg' role='img' aria-label='Bản đồ chia khu Đà Lạt quanh khách sạn'>"+
+    "<defs><linearGradient id='zbg' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#f7f1df'/><stop offset='1' stop-color='#e9f1d8'/></linearGradient></defs>"+
+    "<rect width='1000' height='740' fill='url(#zbg)'/>"+
+    "<path d='M0 600 Q 200 540 380 600 T 760 590 T 1000 560 V740 H0Z' fill='#d6e8c4' opacity='.7'/><path d='M0 120 Q 220 60 420 110 T 820 90 T 1000 120 V0 H0Z' fill='#dcebc9' opacity='.6'/>"+
+    "<path d='M395 470 q 25 -40 70 -30 q 45 10 40 50 q -5 35 -55 35 q -50 0 -55 -55z' fill='#9fd0ea' stroke='#6fb2d8' stroke-width='2'/><text x='450' y='500' text-anchor='middle' font-size='12' font-weight='700' fill='#2b6e96' font-style='italic'>Hồ Xuân Hương</text>"+
+    pines+roads+blobs+
+    "<g><circle cx='480' cy='175' r='26' fill='#fff' stroke='#c0392b' stroke-width='4'/><text x='480' y='184' text-anchor='middle' font-size='24'>🏨</text>"+
+    "<rect x='395' y='205' width='170' height='24' rx='12' fill='#c0392b'/><text x='480' y='222' text-anchor='middle' font-size='13' font-weight='800' fill='#fff'>Phương Trinh Villa</text></g>"+
+    "<g transform='translate(930,690)'><circle r='22' fill='#fff' stroke='#b08a5a' stroke-width='2'/><path d='M0 -16 L6 0 L0 -4 L-6 0Z' fill='#c0392b'/><text y='16' text-anchor='middle' font-size='11' font-weight='800' fill='#6b4a2b'>B</text></g>"+
+    "</svg>";
+}
+function renderZones(){
+  const m=$("zMap");if(!m)return;
+  m.innerHTML=zoneSvg();
+  $("zTags").innerHTML="<span class='lbl'>Lọc</span><button class='chip' type='button' data-zt='all' aria-pressed='"+(zTag==="all")+"'>Tất cả</button>"+TAGS.map(t=>"<button class='chip' type='button' data-zt='"+t[0]+"' aria-pressed='"+(zTag===t[0])+"'>"+t[1]+"</button>").join("");
+  const zs=zSel?ZONES.filter(z=>z.n===zSel):ZONES;
+  const nz=spots.filter(p=>!ZBY[p.zone]&&(zTag==="all"||tagsOf(p).includes(zTag)));
+  $("zGrid").innerHTML=zs.map(z=>{
+    const inZ=spots.filter(p=>String(p.zone)===String(z.n)&&(zTag==="all"||tagsOf(p).includes(zTag))).sort((a,b)=>(kmOf(a)??99)-(kmOf(b)??99));
+    const groups=TAGS.filter(t=>zTag==="all"||t[0]===zTag).map(t=>{const it=inZ.filter(p=>tagsOf(p).includes(t[0]));return it.length?"<div class='zc-g'><h4 style='color:"+t[3]+"'>"+t[1]+"</h4><ul>"+it.map(p=>"<li><a href='"+esc(mapUrl(p))+"' target='_blank' rel='noopener'>"+esc(p.name)+"</a><span>"+esc(kmTxt(p))+"</span></li>").join("")+"</ul></div>":""}).join("");
+    return "<div class='zc"+(zSel===z.n?" on":"")+"' style='--zc:"+z.c+"'><div class='zc-h'><div><b>Khu "+z.n+" · "+esc(z.name)+"</b><small>"+esc(z.sub)+"</small></div><span class='zc-n'>"+inZ.length+" chỗ</span></div>"+(groups||"<p class='note' style='margin:0'>Chưa có chỗ nào trong nhóm này.</p>")+
+      "<button class='btn ghost' type='button' data-goz='"+z.n+"'>Xem thẻ chi tiết ↗</button></div>"}).join("")+
+    (!zSel&&nz.length?"<div class='zc' style='--zc:#9aa9b5'><div class='zc-h'><div><b>Chưa xếp khu</b><small>Chưa có vị trí chính xác</small></div><span class='zc-n'>"+nz.length+" chỗ</span></div><div class='zc-g'><ul>"+nz.map(p=>"<li><a href='"+esc(mapUrl(p))+"' target='_blank' rel='noopener'>"+esc(p.name)+"</a><span>"+tagsOf(p).map(t=>TAGL[t][1].split(" ")[0]).join(" ")+"</span></li>").join("")+"</ul></div></div>":"")+
+    (zSel?"<div style='display:flex;align-items:center'><button class='btn ghost' type='button' data-zall='1'>← Xem tất cả các khu</button></div>":"");
+}
+document.addEventListener("click",e=>{
+  const g=e.target.closest("#zMap [data-zone]");if(g){const n=+g.dataset.zone;zSel=zSel===n?0:n;renderZones();return}
+  const t=e.target.closest("#zTags [data-zt]");if(t){zTag=t.dataset.zt;renderZones();return}
+  if(e.target.closest("[data-zall]")){zSel=0;renderZones();return}
+  const go=e.target.closest("[data-goz]");if(go){spZone=go.dataset.goz;spWhen=zTag==="all"?"all":zTag;document.querySelector("nav.tabs button[data-tab='spots']").click();renderSpots();window.scrollTo({top:$("tab-spots").offsetTop-80,behavior:"smooth"})}
+});
+document.addEventListener("keydown",e=>{const g=e.target.closest&&e.target.closest("#zMap [data-zone]");if(g&&(e.key==="Enter"||e.key===" ")){e.preventDefault();g.dispatchEvent(new MouseEvent("click",{bubbles:true}))}});
 function openSp(p){editSp=p||null;confirmDel=null;$("spForm").hidden=false;$("spFormTitle").textContent=p?"Sửa địa điểm":"Thêm địa điểm";
-  $("spName").value=p?p.name:"";$("spType").value=p?p.type:"an";$("spAddr").value=p?p.address||"":"";$("spHours").value=p?p.hours||"":"";$("spUrl").value=p?p.url||"":"";$("spNote").value=p?p.note||"":"";
+  $("spName").value=p?p.name:"";$("spType").value=p?p.type:"an";$("spAddr").value=p?p.address||"":"";$("spHours").value=p?p.hours||"":"";$("spUrl").value=p?p.url||"":"";$("spNote").value=p?p.note||"":"";$("spZone").value=p&&p.zone?String(p.zone):"";$("spKm").value=p&&p.km!=null?String(p.km).replace(".",","):"";const tg=p?tagsOf(p):[];$("spTags").innerHTML=TAGS.map(t=>"<label><input type='checkbox' value='"+t[0]+"'"+(tg.includes(t[0])?" checked":"")+"> "+t[1]+"</label>").join("");
   $("spErr").hidden=true;renderSpDelete();$("spForm").scrollIntoView({block:"nearest",behavior:"smooth"});$("spName").focus()}
 function closeSp(){$("spForm").hidden=true;editSp=null;confirmDel=null}
 function renderSpDelete(){let box=$("spDelBox");if(box)box.remove();if(!editSp)return;
@@ -917,7 +1019,7 @@ $("spSave").onclick=async()=>{
   const err=!name?"Nhập tên địa điểm.":!address?"Nhập địa chỉ.":(url&&!/^https:\/\//i.test(url))?"Link phải bắt đầu bằng https://":"";
   if(err){$("spErr").textContent=err;$("spErr").hidden=false;return}
   if(!db)return;
-  const body={name:name.slice(0,100),type:$("spType").value,address:address.slice(0,200),hours:$("spHours").value.trim().slice(0,80),url:url.slice(0,500),note:$("spNote").value.trim().slice(0,200)};
+  const body={name:name.slice(0,100),type:$("spType").value,address:address.slice(0,200),hours:$("spHours").value.trim().slice(0,80),url:url.slice(0,500),note:$("spNote").value.trim().slice(0,200),tags:[...document.querySelectorAll("#spTags input:checked")].map(i=>i.value),zone:$("spZone").value?+$("spZone").value:null,km:(()=>{const k=parseFloat($("spKm").value.replace(",","."));return isFinite(k)?k:null})()};
   const was=editSp;closeSp();
   if(was)await guard(db.doc("spots/"+was.id).update(body));else await guard(db.collection("spots").doc().set({...body,createdAt:Date.now()}));
 };
@@ -996,8 +1098,8 @@ $("sSave").onclick=async()=>{
   spec.forEach(([top,w,hh,dur,delay])=>{h+="<div class='bc' style='top:"+top+"vh;width:"+w+"px;height:"+hh+"px;animation-duration:"+dur+"s;animation-delay:"+delay+"s;opacity:"+(.6+rnd()*.35).toFixed(2)+"'></div>"});bc.innerHTML=h}
 })();
 /* ---------- game: bình chọn + vòng quay ---------- */
-let votes=[], gameLast=null, gCat="an", spinning=false, wheelRot=0, wheelItems=[], lastResult=null;
-const GCAT={an:"🍲 Quán ăn",cafe:"☕ Cà phê",choi:"📸 Vui chơi"};
+let votes=[], gameLast=null, gCat="sang", spinning=false, wheelRot=0, wheelItems=[], lastResult=null;
+const GCAT=Object.assign({an:"🍲 Quán ăn",cafe:"☕ Cà phê"},Object.fromEntries(TAGS.map(t=>[t[0],t[1]])));
 const VKEY="dalat-voter";
 let voter=(()=>{try{return JSON.parse(localStorage.getItem(VKEY)||"null")}catch(e){return null}})()||{id:"v_"+Math.random().toString(36).slice(2,10)+Date.now().toString(36),name:""};
 const saveVoter=()=>{try{localStorage.setItem(VKEY,JSON.stringify(voter))}catch(e){}};
@@ -1006,7 +1108,7 @@ const myVoteDoc=()=>votes.find(v=>v.id===voter.id);
 const votersOf=sid=>votes.filter(v=>v.picks&&v.picks[sid]).map(v=>v.name||"Ai đó");
 const WCOL=["#2b8bd0","#f39c1f","#2e7d55","#79c3ef","#e0603a","#5fb98c","#8a6fd1","#f6c453"];
 
-function gameSpots(){return spots.filter(p=>p.type===gCat)}
+function gameSpots(){return spots.filter(p=>tagsOf(p).includes(gCat))}
 function rankList(){return gameSpots().map(p=>({p,v:votersOf(p.id)})).sort((a,b)=>b.v.length-a.v.length||String(a.p.name).localeCompare(String(b.p.name),"vi"))}
 
 function renderGame(){
@@ -1016,7 +1118,7 @@ function renderGame(){
     sel.innerHTML="<option value=''>— Chọn tên của bạn —</option>"+names.map(n=>"<option"+(n===voter.name?" selected":"")+">"+esc(n)+"</option>").join("")+
       (voter.name&&!names.includes(voter.name)?"<option selected>"+esc(voter.name)+"</option>":"");
   }
-  document.querySelectorAll("#gCats button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.c===gCat?"true":"false"));
+  if(!$("gCats").children.length)$("gCats").innerHTML=TAGS.map(t=>"<button type='button' data-c='"+t[0]+"'>"+t[1]+"</button>").join("");document.querySelectorAll("#gCats button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.c===gCat?"true":"false"));
   const list=rankList(), max=Math.max(1,...list.map(x=>x.v.length)), mine=(myVoteDoc()||{}).picks||{};
   const totalVoters=votes.filter(v=>Object.keys(v.picks||{}).length).length;
   $("gBoardSub").textContent=totalVoters?totalVoters+" người đã bình chọn":"Chưa ai bình chọn, bạn mở hàng nhé!";
